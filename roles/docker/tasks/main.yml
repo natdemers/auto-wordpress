@@ -1,0 +1,16 @@
+---
+ - name: install docker
+   yum: name=docker state=latest
+
+ - name: start docker service
+   service: name=docker state=started enabled=yes
+
+ - name: install docker py
+   pip: name=docker-py state=present
+
+ - name: create a docker image
+   docker_image:
+      name: mysql
+      state: present
+      tag: 8.0
+      pull: false

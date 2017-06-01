@@ -1,0 +1,30 @@
+---
+ - name: get public ip to set firewall
+   ipify_facts:
+   register: public_ip
+
+ - name: create security group with ssh and web ports
+   tags: sg
+   ec2_group:
+      # Create a specific name for now to avoid conflict with any other sg's.
+      # Rework this to be a friendlier name to type later.
+      name: ndemers_wordpress_ws_secure
+      region: "{{ region }}"
+      description: security group for test webserver host
+      rules:
+      # allow access from the user's ip address
+       - proto: tcp
+         from_port: 22
+         to_port: 22
+         cidr_ip: "{{ public_ip.ansible_facts.ipify_public_ip }}/32"
+       - proto: tcp
+         from_port: 80
+         to_port: 80
+         cidr_ip: "{{ public_ip.ansible_facts.ipify_public_ip }}/32"
+       - proto: tcp
+         from_port: 443
+         to_port: 443
+         cidr_ip: "{{ public_ip.ansible_facts.ipify_public_ip }}/32"
+      rules_egress:
+       - proto: all
+         cidr_ip: 0.0.0.0/0

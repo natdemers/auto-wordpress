@@ -1,0 +1,40 @@
+---
+# This version is running 4.7.5. To change this, use the group_vars/all file
+
+ - name: download wordpress
+   get_url: url=http://wordpress.org/wordpress-{{ wp_version }}.tar.gz dest=~/wordpress-{{ wp_version }}.tar.gz
+
+ - name: extract wordpress archive
+   unarchive: src=~/wordpress-{{ wp_version }}.tar.gz dest=~/ remote_src=yes
+
+ - name: copy wordpress to apache root directory
+   shell: cp -r ~/wordpress/* /var/www/html  
+
+ - name: fetch random salts for wordpress config
+   command: curl https://api.wordpress.org/secret-key/1.1/salt/
+   register: wp_salt
+
+ - name: copy the wordpress database using the mysqldump template
+   template: src=dump.sql dest=/tmp/dump.sql
+
+ - name: import the wordpress database
+   mysql_db:
+     name: wordpress
+     state: import
+     target: /tmp/dump.sql
+     login_host: 0.0.0.0
+     login_port: 3306
+     login_user: root
+     login_password: '{{ wp_root_password }}'
+
+ - name: copy weather auto post to server
+   copy: src=weather.php dest=/var/www/html
+
+ - name: copy wordpress config file to server
+   template: src=wp-config.php dest=/var/www/html/
+
+ - name: change ownership of wordpress installation
+   file: path=/var/www/html/ owner=apache group=apache state=directory recurse=yes
+
+ - name: invoke new weather post
+   shell: php /var/www/html/weather.php

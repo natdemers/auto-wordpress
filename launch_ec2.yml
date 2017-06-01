@@ -1,0 +1,48 @@
+---
+ - hosts: localhost
+   connection: local
+   gather_facts: false
+
+   roles:
+    - security_groups
+
+   tasks:
+    - name: create an ec2 key pair
+      tags: ec2
+      ec2_key:
+         name: '{{ key_name }}'
+         region: '{{ region }}'
+      register: ssh_key
+
+    - name: create the key directory
+      file:
+         path: /tmp/.ssh 
+         state: directory
+         mode: 0700
+
+    - name: store the private key
+      copy: 
+         content: '{{ ssh_key.key.private_key }}' 
+         dest: "/tmp/.ssh/{{ key_name }}.pem"
+         mode: 0600
+      when: ssh_key.changed
+
+    - name: create ec2 instance
+      tags: ec2
+      ec2:
+         key_name: "{{ key_name }}"
+         region: "{{ region }}"
+         instance_type: "{{ instance_type }}"
+         image: "{{ image }}"
+         wait: yes
+         group: ndemers_wordpress_ws_secure
+         # Some suggest putting an id here. Expect to terminate often; 
+         # avoid the id module for now.
+         instance_tags:
+            Name: ndemers_wordpress_web
+            class: ndemers_wordpress
+         # Be sure that only one instance is run
+         count_tag:
+            Name: ndemers_wordpress_web
+         exact_count: 1
+      register: ec2_wp

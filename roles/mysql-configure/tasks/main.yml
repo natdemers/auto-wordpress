@@ -1,0 +1,13 @@
+---
+ - name: install the mysql server
+   yum: name={{ item }} state=present
+   with_items:
+    - mysql-server
+    - mysql-devel
+    - gcc
+
+ - name: install mysql-python
+   pip: name=mysql-python state=present
+
+ - name: create mysql configuration file from the template
+   template: src=my.cnf.j2 dest=/etc/my.cnf

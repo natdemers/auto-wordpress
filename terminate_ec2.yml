@@ -1,0 +1,26 @@
+---
+ - hosts: localhost
+   connection: local
+   gather_facts: false
+
+   tasks:
+    - name: remove the wordpress key
+      ec2_key:
+         name: '{{ key_name }}'
+         region: '{{ region }}'
+         state: absent
+
+    - name: remove the key file from the directory
+      file: path=/tmp/.ssh/{{ key_name }}.pem state=absent
+
+    - name: destroy the ec2 instance
+      ec2:
+         image: '{{ image }}'
+         instance_type: '{{ instance_type }}'
+         region: '{{ region }}'
+         instance_tags:
+            Name: ndemers_wordpress_web
+            class: ndemers_wordpress
+         count_tag:
+            Name: ndemers_wordpress_web
+         exact_count: 0 

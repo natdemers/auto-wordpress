@@ -1,0 +1,10 @@
+---
+ - hosts: tag_class_ndemers_wordpress
+   become: yes
+
+   roles:
+    - web
+    - docker
+    - docker-mysql
+    - mysql-configure
+    - wordpress

@@ -1,0 +1,26 @@
+1.) From your own local machine, create an ansible image for docker
+    docker build -t ansible .
+
+2.) Set your AWS Access Key and AWS Secret Key as environmental variables with the commands:
+    export AWS_ACCESS_KEY_ID='your_access_key_id'
+    export AWS_SECRET_ACCESS_KEY='your_secret_access_key'
+
+3.) To run within the bash shell, source the following executable. This bash script
+    assumes the AWS Keys are stored as environmental variables.
+    . run
+
+4.) Provision an EC2 Instance using:
+    ansible-playbook -i hosts launch_ec2.yml
+
+5.) Install and run Wordpress using the following command. Note the ec2.py inventory file.
+    To specify a custom domain name, use -e "wp_home_site=some_site.com" within the command.
+    ansible-playbook -i ec2.py site.yml
+
+6.) To see the Wordpress blog, type in your web browser the public IP of the EC2 instance, 
+    or the custom URL passed in. 
+
+7.) Once finished, tear down the instance and remove the key pair using the command:
+    ansible-playbook -i hosts terminate_ec2.yml
+
+8.) Exit out of the bash shell by invoking:
+    exit
